@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, BackgroundTasks
+from fastapi import FastAPI, APIRouter, BackgroundTasks, Response, HTTPException
 import uvicorn
 from core.domains.image_processing import ImageProcessingService
 from infra import SqlDatabaseService
@@ -9,6 +9,8 @@ from core.domains.image_processing import ImageModel
 from infra import ImageEntity
 
 app = FastAPI()
+
+
 # TODO rework main
 
 def upgrade_database():
@@ -27,21 +29,27 @@ image_processing_service = ImageProcessingService(configure_logger("image_proces
 app.image_processing_service = image_processing_service
 upgrade_database()
 
-# --------------- router # TODO move to separate file after establish dependencies
+# --------------- router # TODO move to separate file after establish dependencies and
+#  creating abstraction
 router = APIRouter()
 
 
 @router.get('/get_image_frames')
-async def image_frames_route(depth_min: int = None, depth_max: int = None):
+async def image_frames_route(depth_min: int, depth_max: int):
     try:
         if depth_min is None or depth_max is None:
             return {"error": "depth_min and depth_max are required"}
         if depth_min > depth_max:
             return {"error": "depth_min cannot be greater than depth_max"}
         # Add logic to get image frames
-        return {"result": "Image frames"}
+        headers = {
+            "Content-Disposition": f"attachment; filename=depth_{depth_min}_to_{depth_max}.png"
+        }
+        image_binary = image_processing_service.get_images_by_depth(depth_min=depth_min,
+                                                                    depth_max=depth_max)
+        return Response(content=image_binary, media_type="image/png", headers=headers)
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post('/start-processing/{file_name}')
@@ -51,7 +59,8 @@ async def start_processing(file_name: str, background_tasks: BackgroundTasks):
                                   file_name)
         return {"message": "Processing started in the background."}
     except Exception as e:
-        return {"error": str(e)}
+        return HTTPException(status_code=500, detail=str(e))
+
 
 app.include_router(router, prefix='/api')
 

@@ -26,8 +26,11 @@ class Image(Base, EntityInterface, metaclass=CombinedMeta):
     )
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'EntityInterface':
-        if 'depth' in data and 'image_data' in data and isinstance(data['image_data'], np.ndarray):
-            return cls(depth=float(data['depth']), image=data['image_data'].astype(int).tolist())
+    def from_dict(cls, data: dict) -> EntityInterface:
+        if 'depth' in data and 'image' in data and isinstance(data['image'], np.ndarray):
+            return cls(depth=float(data['depth']), image=data['image'].astype(int).tolist())
         else:
             raise ValueError("Required data missing for image entity creation")
+
+    def to_dict(self) -> dict:
+        return {'depth': self.depth, 'image': self.image}

@@ -6,3 +6,7 @@ class EntityInterface(metaclass=ABCMeta):
     @abstractmethod
     def from_dict(cls, data: dict) -> 'EntityInterface':
         pass
+
+    @abstractmethod
+    def to_dict(self) -> dict:
+        pass

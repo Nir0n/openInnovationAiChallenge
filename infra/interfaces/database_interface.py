@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Dict, Any, List
+from core.interfaces import ModelInterface
 
 
 class DatabaseInterface(ABC):
 
     @abstractmethod
-    def save(self, entity):
+    def save(self, model: ModelInterface):
         """Save or update an entity in the database."""
         pass
 
@@ -21,4 +23,18 @@ class DatabaseInterface(ABC):
     @abstractmethod
     def get_all(self):
         """Retrieve all entities."""
+        pass
+
+    @abstractmethod
+    def filter_by(self, model:ModelInterface, criteria: Dict[str, Any]) -> List[ModelInterface]:
+        """
+        Retrieve entities based on filtering criteria.
+        
+        Args:
+            criteria (Dict[str, Any]): A dictionary where keys are column names 
+                                       and values are the criteria for filtering.
+
+        Returns:
+            List[Any]: A list of entities that match the criteria.
+        """
         pass
