@@ -12,3 +12,4 @@ Demo with AWS instance: http://54.208.252.93:5000/api/get_image_frames?depth_min
 1) add reverse proxy
 2) cqrs pattern for segregation read and writes
 3) with 2 option add required repositories
+4) maintain global state of services correctly accross threads
