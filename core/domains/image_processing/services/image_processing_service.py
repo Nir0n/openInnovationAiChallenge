@@ -77,36 +77,24 @@ class ImageProcessingService(ImageProcessingInterface):
 
         # Use the db_service's filter_by method to retrieve matching images
         images = self.db_service.filter_by(Image, criteria)
+        if not images:
+            return None
         image_base64 = self.__create_heatmap(images)
         return image_base64
 
     @staticmethod
     def __create_heatmap(images: List[Image]):
-        # Sort images by depth
         images = sorted(images, key=lambda x: x.depth)
-
-        # Extract image data and depth values
         image_data = [image.image for image in images]
         depths = [image.depth for image in images]
-
-        # Convert image data to a 2D numpy array
         image_array = np.array(image_data)
-
-        # Create a figure and axis for the heatmap
         plt.figure(figsize=(10, 8))
         ax = plt.gca()
-
-        # Create the heatmap
-        cax = ax.imshow(image_array, aspect='auto', cmap='gray')
-
-        # Set the y-axis labels to depth values
+        ax.imshow(image_array, aspect='auto', cmap='gray')
         ax.set_yticks(range(len(depths)))
         ax.set_yticklabels([f'{depth:.1f}' for depth in depths])
-
-        # Set labels for axes
         ax.set_ylabel('Depth')
         ax.set_xlabel('Pixel Index')
-
         buf = BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)

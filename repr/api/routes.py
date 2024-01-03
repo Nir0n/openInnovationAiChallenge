@@ -17,6 +17,8 @@ async def image_frames_route(depth_min: int, depth_max: int, image_processing_se
         }
         image_binary = image_processing_service.get_images_by_depth(depth_min=depth_min,
                                                                     depth_max=depth_max)
+        if not image_binary:
+            return Response(status_code=404, content="Images for this range not found")
         return Response(content=image_binary, media_type="image/png", headers=headers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
